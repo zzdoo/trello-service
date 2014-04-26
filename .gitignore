@@ -54,3 +54,6 @@ docs/_build/
 
 # virturalenv
 venv/
+
+# cfg
+settings.cfg
