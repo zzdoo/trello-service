@@ -9,28 +9,33 @@ class TrelloWrapper():
     def __init__(self, api_key, api_token):
         self.tc = TrelloClient(api_key, api_token)
 
-    def add_card_with_due(self, name, due, desc=None):
+
+    def add_card(self, list_target, card_name, card_due, desc=None):
         """
-        Add card with a due date
+        Add card to list with a due date
             due: time.stuct_time object
         """
+        try:
+            due_str = time.strftime("%Y-%m-%dT%H:%M", card_due)
+            json_obj = list_target.client.fetch_json(
+                '/lists/' + list_target.id + '/cards',
+                http_method='POST',
+                post_args={'name': card_name, 'due': due_str,
+                    'idList': list_target.id, 'desc': desc}, )
+        except Exception as e:
+            print(str(e))
 
-        # XXX Better methods to get list id
-        # TODO Extract Life/Inbox as param
+
+    def find_list(self, board_name, list_name):
+        """ Return list specified by board_name/list_name"""
         for b in self.tc.list_boards():
-            if b.name != 'Life':
+            if b.name != board_name:
                 continue
 
             for l in b.open_lists():
-                if l.name != 'Inbox':
+                if l.name != list_name:
                     continue
-                try:
-                    due_str = time.strftime("%Y-%m-%dT%H:%M", due)
-                    json_obj = l.client.fetch_json(
-                        '/lists/' + l.id + '/cards',
-                        http_method='POST',
-                        post_args={'name': name, 'due': due_str,
-                            'idList': l.id, 'desc': desc}, )
-                except Exception as e:
-                    print(str(e))
 
+                return l
+
+        return None

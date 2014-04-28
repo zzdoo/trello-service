@@ -19,4 +19,6 @@ app.config.from_pyfile('settings.cfg')
 tw = TrelloWrapper(app.config['TRELLO_API_KEY'],
         app.config['TRELLO_TOKEN'])
 
-tw.add_card_with_due("hello", time.gmtime())
+life_inbox = tw.find_list('Life', 'Inbox')
+if list is not None:
+    tw.add_card(life_inbox, "hello", time.gmtime())
