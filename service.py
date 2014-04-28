@@ -9,13 +9,14 @@
 """
 
 from flask import Flask
-from trello import TrelloClient
+from trello_wrapper import TrelloWrapper
+import time
 
 
 app = Flask(__name__)
 app.config.from_pyfile('settings.cfg')
 
-tc = TrelloClient(app.config['TRELLO_API_KEY'],
+tw = TrelloWrapper(app.config['TRELLO_API_KEY'],
         app.config['TRELLO_TOKEN'])
 
-print(tc.list_boards())
+tw.add_card_with_due("hello", time.gmtime())
