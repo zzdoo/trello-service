@@ -12,6 +12,13 @@ reload(sys)
 sys.setdefaultencoding('utf-8') 
 
 NOT_EXIST = -999
+
+# TODO Move list_dt to config
+list_dt = {
+            "l": ("Life", "Inbox"),
+            "w": ("Work", "Inbox"),
+            "p": ("Product and Programming", "Inbox") }
+
 days_dt = {
             "今天": 0, "明天": 1, "后天": 2, "大后天": 3,
             "昨天": -1, "前天": -2 }
@@ -32,11 +39,11 @@ moment_dt = {
 
 class Parser():
 
-    def __init__(self, t):
+    def __init__(self, t_now):
         """
-            t: time.time() or time object
+            t_now: time.time() or time object
         """
-        self.curr_dt = datetime.datetime.fromtimestamp(t)
+        self.curr_dt = datetime.datetime.fromtimestamp(t_now)
 
     def parse_week_offset(self, sentence):
         week = self.curr_dt.isocalendar()[2]
@@ -77,12 +84,16 @@ class Parser():
             c2 = 0
         else:
             c2 = int(sentence[index-2])
+
+        minute = 0
+        if index is not len(sentence)-1 and sentence[index+1] == u"半":
+            minute = 30
         
-        cl = c2*10 + c1
-        if cl >= 24:
+        hour = c2*10 + c1
+        if hour >= 24:
             return NOT_EXIST
 
-        return cl
+        return hour + minute/60.0
 
     def parse_clock_and_moment(self, sentence):
         clock = self.parser_clock(sentence)
@@ -98,7 +109,7 @@ class Parser():
 
         return day_off
 
-    def parse(self, sentence):
+    def parse_due_time(self, sentence):
         """ Return a datetime object"""
         clock = self.parse_clock_and_moment(sentence)
         day_off = self.parse_day_and_week(sentence)
@@ -106,11 +117,28 @@ class Parser():
         parse_dt = self.curr_dt
         if clock is NOT_EXIST and day_off is NOT_EXIST:
             # Return curr time
-            return parse_dt
+            pass
         else:
             if clock is not NOT_EXIST:
-                parse_dt = parse_dt.replace(hour=clock)
+                hour = int(clock)
+                minute = int((clock-hour)*60)
+                parse_dt = parse_dt.replace(hour=hour)
+                parse_dt = parse_dt.replace(minute=minute)
             if day_off is not NOT_EXIST:
                 parse_dt = parse_dt + datetime.timedelta(days=day_off)
 
-            return parse_dt
+        return parse_dt
+
+    def parse_list(self, sentence):
+        """Return which board/list should be added to"""
+        index = sentence.find(u'#')
+
+        if index == len(sentence) - 1:
+            return None
+
+        key = sentence[index+1]
+        if key in list_dt:
+            return list_dt[key]
+
+        return None
+

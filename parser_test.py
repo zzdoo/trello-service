@@ -46,12 +46,23 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(result,
                 19, "parser_clock failed, result:" + str(result))
 
-    def test_parse(self):
+        sentence = u"19点半吃饭"
+        result = self.parser.parser_clock(sentence)
+        self.assertEqual(result,
+                19.5, "parser_clock failed, result:" + str(result))
+
+    def test_parse_due_time(self):
         sentence = u"明天19点打球"
-        dt = self.parser.parse(sentence)
+        dt = self.parser.parse_due_time(sentence)
         self.assertEqual(dt.hour, 19, "parse hour failed.")
         new_dt = self.date + datetime.timedelta(days=1)
         self.assertEqual(dt.day, new_dt.day)
+
+    def test_parse_list(self):
+        sentence = u"明天19点打球#l"
+        (b, l) = self.parser.parse_list(sentence)
+        self.assertTupleEqual((b, l), ("Life", "Inbox"),
+                "test parse list test failed.")
 
 if __name__ == '__main__':
     unittest.main()
