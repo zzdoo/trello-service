@@ -21,6 +21,9 @@ tw = TrelloWrapper(app.config['TRELLO_API_KEY'],
         app.config['TRELLO_TOKEN'])
 
 if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print("Usage: python " + sys.argv[0] + " sentence_send_to_trello")
+        exit(1)
     sentence = sys.argv[1].decode('utf-8')
     ret = tw.smart_add_card(sentence)
     if ret is True:
